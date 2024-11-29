@@ -6,21 +6,23 @@ public class Character : MonoBehaviour
 {
     [SerializeField] CharacterController controller;
 
+    [SerializeField] InputActionProperty move;
+    [SerializeField] InputActionProperty jump;
+
     [SerializeField] float moveSpeed;
     [SerializeField] float rotateSpeed;
     [SerializeField] float jumpPower;
 
     Vector3 moveDirection = Vector3.zero;
-    private void Update()
+    private void Awake()
     {
-        Move();
-
-        Jump();
+        move.reference.action.performed += Move;
+        jump.reference.action.performed += Jump;
     }
 
-    void Move()
+    void Move(InputAction.CallbackContext obj)
     {
-        moveDirection = Vector3.zero;
+        moveDirection = obj.ReadValue<Vector3>();
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -59,15 +61,13 @@ public class Character : MonoBehaviour
         controller.SimpleMove(moveDirection);
     }
 
-    void Jump()
+    void Jump(InputAction.CallbackContext obj)
     {
         if (controller.isGrounded)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                moveDirection.y = jumpPower;
-
-                controller.SimpleMove(moveDirection);
+                //controller.f
             }
         }
     }
