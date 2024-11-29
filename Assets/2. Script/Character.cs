@@ -66,6 +66,7 @@ public class Character : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 moveDirection.y = jumpPower;
+
                 controller.SimpleMove(moveDirection);
             }
         }
