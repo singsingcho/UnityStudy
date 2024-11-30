@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -29,23 +30,22 @@ public class Character : Player
     private void Start()
     {
         originalStepOffset = controller.stepOffset;
+        targetRotation = transform.rotation;
+        targetCameraRotation = Camera.main.transform.localRotation;
     }
 
     private void FixedUpdate()
     {
-        Move();
-        Look();
         Jump();
-        Interaction();
 
         controller.Move(controlDirection * Time.fixedDeltaTime);
     }
 
-    void Move()
+    void Move(InputAction.CallbackContext obj)
     {
         if (controller.isGrounded)
         {
-            MoveDirection = move.action.ReadValue<Vector2>();
+            MoveDirection = obj.ReadValue<Vector2>();
 
             controlDirection.x = MoveDirection.x * moveSpeed;
             controlDirection.z = MoveDirection.y * moveSpeed;
@@ -61,12 +61,32 @@ public class Character : Player
         }
     }
 
-    void Look()
+    void MoveEnd(InputAction.CallbackContext obj)
     {
-        LookDirection = look.action.ReadValue<Vector2>();
+        if (controller.isGrounded)
+        {
+            MoveDirection = Vector2.zero;
+            controlDirection.x = 0.0f;
+            controlDirection.z = 0.0f;
+            SetState(idle);
+        }
+    }
+
+    private float verticalLookRotation;
+    private Quaternion targetRotation;
+    private Quaternion targetCameraRotation;
+    void Look(InputAction.CallbackContext obj)
+    {
+        LookDirection = obj.ReadValue<Vector2>();
         LookDirection.y = 0f;
 
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(transform.forward + LookDirection), rotateSpeed * Time.deltaTime);
+        targetRotation *= Quaternion.Euler(0f, LookDirection.x * rotateSpeed, 0f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime);
+
+        verticalLookRotation -= LookDirection.y * rotateSpeed;
+        verticalLookRotation = Mathf.Clamp(verticalLookRotation, -90f, 90f);
+        targetCameraRotation = Quaternion.Euler(verticalLookRotation, 0f, 0f);
+        Camera.main.transform.localRotation = Quaternion.Slerp(Camera.main.transform.localRotation, targetCameraRotation, Time.fixedDeltaTime);
     }
 
     private float ySpeed;
@@ -84,6 +104,16 @@ public class Character : Player
             {
                 ySpeed = jumpPower;
             }
+            else
+            {
+                if (!move.action.IsInProgress())
+                {
+                    MoveDirection = Vector2.zero;
+                    controlDirection.x = 0.0f;
+                    controlDirection.z = 0.0f;
+                    SetState(idle);
+                }
+            }
         }
         else
         {
@@ -93,9 +123,9 @@ public class Character : Player
         controlDirection.y = ySpeed;
     }
 
-    void Interaction()
+    void Interaction(InputAction.CallbackContext obj)
     {
-        if (interaction.action.ReadValue<float>() > 0f)
+        if (obj.ReadValue<float>() > 0f)
         {
             GameObject[] go = GameObject.FindGameObjectsWithTag("Enemy");
             for (int i = 0; i < go.Length; i++)
@@ -113,12 +143,24 @@ public class Character : Player
         move.action.Enable();
         look.action.Enable();
         jump.action.Enable();
+        interaction.action.Enable();
+
+        move.action.performed += Move;
+        move.action.canceled += MoveEnd;
+        look.action.performed += Look;
+        interaction.action.performed += Interaction;
     }
 
     private void OnDisable()
     {
         move.action.Disable();
         look.action.Disable();
-        jump.action.Disable();   
+        jump.action.Disable();
+        interaction.action.Disable();
+
+        move.action.performed -= Move;
+        move.action.canceled -= MoveEnd;
+        look.action.performed -= Look;
+        interaction.action.performed -= Interaction;
     }
 }
