@@ -8,13 +8,25 @@ public interface PoolManagedObject
     public GameObject source { get; set; }
     public void GetObject();
     public void ReturnObject();
-    public GameObject gameObject { get; }
+    public GameObject GameObject { get; }
 }
 
 public class PoolManager : MonoBehaviour
 {
+    [SerializeField] private Enemy enemyPrefab;
     public Dictionary<string, PoolManagedObject> prefabDictionary = new Dictionary<string, PoolManagedObject>();
     public Dictionary<GameObject, Queue<PoolManagedObject>> poolDictionary = new Dictionary<GameObject, Queue<PoolManagedObject>>();
+
+    private void Awake()
+    {
+        GameManager.Instance.SetObjectPool(this);
+    }
+
+    private void Start()
+    {
+        enemyPrefab.source = enemyPrefab.gameObject;
+        prefabDictionary.Add(PlayManager.EnemyKey, enemyPrefab);
+    }
 
     public bool GetSourceByKey(string key, out PoolManagedObject source)
     {
@@ -38,7 +50,7 @@ public class PoolManager : MonoBehaviour
             {
                 var obj = poolDictionary[source.source].Dequeue();
                 obj.GetObject();
-                return obj.gameObject;
+                return obj.GameObject;
             }
         }
         else
