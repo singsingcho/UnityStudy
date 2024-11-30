@@ -13,7 +13,7 @@ public class Character : Player
     [SerializeField] InputActionProperty interaction;
 
     protected Vector2 MoveDirection;
-    protected Vector3 LookDirection;
+    protected Vector2 LookDirection;
 
     [SerializeField] float moveSpeed;
     [SerializeField] float rotateSpeed;
@@ -22,10 +22,6 @@ public class Character : Player
     Vector3 controlDirection = Vector3.zero;
     RunState run = new RunState();
     IdleState idle = new IdleState();
-    private void Awake()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-    }
 
     private void Start()
     {
@@ -84,7 +80,7 @@ public class Character : Player
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime);
 
         verticalLookRotation -= LookDirection.y * rotateSpeed;
-        verticalLookRotation = Mathf.Clamp(verticalLookRotation, -90f, 90f);
+        verticalLookRotation = Mathf.Clamp(verticalLookRotation, -70f, 80f);
         targetCameraRotation = Quaternion.Euler(verticalLookRotation, 0f, 0f);
         Camera.main.transform.localRotation = Quaternion.Slerp(Camera.main.transform.localRotation, targetCameraRotation, Time.fixedDeltaTime);
     }
