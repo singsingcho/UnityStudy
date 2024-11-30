@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class Character : MonoBehaviour
+public class Character : Player
 {
     [SerializeField] CharacterController controller;
 
@@ -19,6 +19,8 @@ public class Character : MonoBehaviour
     [SerializeField] float jumpPower;
 
     Vector3 controlDirection = Vector3.zero;
+    RunState run = new RunState();
+    IdleState idle = new IdleState();
     private void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -47,6 +49,15 @@ public class Character : MonoBehaviour
 
             controlDirection.x = MoveDirection.x * moveSpeed;
             controlDirection.z = MoveDirection.y * moveSpeed;
+
+            if (MoveDirection.magnitude > 0)
+            {
+                SetState(run);
+            }
+            else
+            {
+                SetState(idle);
+            }
         }
     }
 
