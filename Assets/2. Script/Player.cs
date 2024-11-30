@@ -11,17 +11,17 @@ public class IdleState : IPlayerState
 {
     public void Enter(Player player)
     {
-        Debug.Log("Player entered Idle state.");
+        //Debug.Log("Player entered Idle state.");
     }
 
     public void Stay(Player player)
     {
-        Debug.Log("Player is idle.");
+        //Debug.Log("Player is idle.");
     }
 
     public void Exit(Player player)
     {
-        Debug.Log("Player exited Idle state.");
+        //Debug.Log("Player exited Idle state.");
     }
 }
 
@@ -29,17 +29,17 @@ public class RunState : IPlayerState
 {
     public void Enter(Player player)
     {
-        Debug.Log("Player entered Run state.");
+        //Debug.Log("Player entered Run state.");
     }
 
     public void Stay(Player player)
     {
-        Debug.Log("Player is running.");
+        //Debug.Log("Player is running.");
     }
 
     public void Exit(Player player)
     {
-        Debug.Log("Player exited Run state.");
+        //Debug.Log("Player exited Run state.");
     }
 }
 
